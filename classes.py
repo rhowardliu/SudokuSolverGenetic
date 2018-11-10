@@ -1,12 +1,11 @@
 class Box(object):
   """docstring for Box"""
-  def __init__(self, i, j, val=0, fixed = False, possible=set(i for i in range(1,10))):
+  def __init__(self, i, j, val=0, fixed = False):
     super(Box, self).__init__()
     self.i = i
     self.j = j
     self.val = val
     self.fixed = fixed
-    self.possible = possible
 
 class BoxCollection(object):
   """docstring for BoxCollection"""
@@ -19,16 +18,6 @@ class BoxCollection(object):
 
   def addCollection(self, box):
     self.boxes.append(box)
-
-  def trimPossibleValues(self, val):
-    for box in self.boxes:
-      if box.possible and val in box.possible:
-        box.possible.remove(val)
-
-  def plantPossibleValues(self, val):
-    for box in self.boxes:
-      if not box.fixed:
-        box.possible.add(val)
 
 
 class Puzzle(object):
@@ -47,25 +36,16 @@ class Puzzle(object):
     self.vertical = [BoxCollection() for i in range(9)]
     self.bigbox = [BoxCollection() for i in range(9)]
     self.initCollections()
-    for box in self.boxes:
-      if box.val:
-        removePossibleValueFromBoxes(box, box.val)
 
   def initCollections(self):
     for box in self.boxes:
-      self.horizontal[box.i].addCollection(box)
-      self.vertical[box.j].addCollection(box)
-      self.bigbox[findBoxNumber(box.i, box.j)].addCollection(box)
+      if not box.val: continue
+      self.addBoxToCollections(box)
 
-  def removePossibleValueFromBoxes(self, box, val):
-      self.horizontal[box.i].trimPossibleValues(val)
-      self.vertical[box.j].trimPossibleValues(val)
-      self.bigbox[findBoxNumber(box.i, box.j)].trimPossibleValues(val)
-
-  def addPossibleValueForBoxes(self, box, val):
-      self.horizontal[box.i].plantPossibleValues(val)
-      self.vertical[box.j].plantPossibleValues(val)
-      self.bigbox[findBoxNumber(box.i, box.j)].plantPossibleValues(val)    
+  def addBoxToCollections(self, box):
+    self.horizontal[box.i].addCollection(box)
+    self.vertical[box.j].addCollection(box)
+    self.bigbox[findBoxNumber(box.i, box.j)].addCollection(box)
 
   def findBoxNumber(self, i, j)
     return 3* (j//3) + (i//3)
