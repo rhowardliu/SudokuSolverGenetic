@@ -1,11 +1,16 @@
+import numpy as np
+
 class Box(object):
   """docstring for Box"""
-  def __init__(self, i, j, val=0, fixed = False):
+  def __init__(self, i, j, val, fixed):
     super(Box, self).__init__()
     self.i = i
     self.j = j
     self.val = val
     self.fixed = fixed
+
+  def __repr__(self):
+    return str(self.val)
 
 class BoxCollection(object):
   """docstring for BoxCollection"""
@@ -18,6 +23,9 @@ class BoxCollection(object):
 
   def addCollection(self, box):
     self.boxes.append(box)
+
+  def __len__(self):
+    return len(set(boxes))
 
   def __str__(self):
     sudoku_line = ""
@@ -41,7 +49,7 @@ class Puzzle(object):
     for i in range(len(puzzle_array[0])):
       for j in range(len(puzzle_array[0])):
         box_value = puzzle_array[i][j]
-        newBox = Box(i, j, val=box_value, fixed = True) if box_value else Box(i, j)
+        newBox = Box(i, j, val=box_value if box_value else 0, fixed=True if box_value else False)
         self.boxes.append(newBox)
     self.horizontal = [BoxCollection() for i in range(9)]
     self.vertical = [BoxCollection() for i in range(9)]
