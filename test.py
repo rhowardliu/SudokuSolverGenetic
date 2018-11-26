@@ -1,6 +1,18 @@
 import genetic_solver, tree_solver, classes
 import unittest
+import sys
 
+
+EMPTY_PUZZLE = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                ]
 
 puzzle_array_1 = [[5, 3, 4, 0, 7, 8, 9, 1, 2],
                   [6, 0, 2, 1, 9, 5, 3, 4, 8],
@@ -33,6 +45,29 @@ puzzle_array_3 = [[0, 0, 0, 0, 1, 0, 8, 4, 0],
                   [0, 0, 6, 0, 0, 0, 1, 0, 0]]
 
 
+puzzle_array_4 = [[0, 1, 4, 0, 0, 0, 0, 0, 5],
+                  [0, 0, 5, 2, 0, 0, 0, 8, 9],
+                  [0, 2, 0, 0, 7, 6, 1, 0, 0],
+                  [0, 0, 0, 8, 4, 0, 3, 0, 2],
+                  [1, 0, 7, 9, 0, 0, 0, 0, 0],
+                  [4, 3, 0, 0, 0, 0, 0, 9, 0],
+                  [7, 0, 3, 0, 0, 0, 0, 2, 1],
+                  [0, 6, 0, 0, 0, 0, 7, 0, 0],
+                  [0, 5, 1, 0, 0, 0, 0, 3, 0]]
+
+
+puzzle_array_5 = [[8, 3, 0, 0, 0, 0, 0, 7, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 0, 0, 5, 2, 7, 0, 0, 0],
+                  [0, 0, 7, 9, 4, 0, 8, 0, 5],
+                  [9, 0, 0, 0, 0, 0, 0, 0, 4],
+                  [1, 0, 4, 0, 8, 5, 2, 0, 0],
+                  [0, 0, 0, 2, 1, 8, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [0, 7, 0, 0, 0, 0, 0, 6, 1],
+                ]                  
+
+
 class SudokuTest(unittest.TestCase):
 
   def _test_puzzleParse(self):
@@ -46,10 +81,12 @@ class SudokuTest(unittest.TestCase):
     return
 
   def test_puzzleSolveGuess(self):
-    solved = genetic_solver.solveSudoku(puzzle_array_3)
+    solved = genetic_solver.solveSudoku(puzzle_array_5)
+    print("solved!")
     print(solved)
 
 
 
 if __name__== '__main__':
+  sys.setrecursionlimit(2500)
   unittest.main()

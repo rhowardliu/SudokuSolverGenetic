@@ -4,11 +4,15 @@ from copy import deepcopy
 import random
 import time
 
-POPULATION_NUMBER = 1200
-SURVIVAL_RATE = 0.35
-MUTATION_RATE = 0.2
-NUMBER_OF_CROSSOVER = 5
-VERTICAL_SWITCHING_RATE = 0.4
+POPULATION_NUMBER = 1000
+SURVIVAL_RATE = 0.3
+MUTATION_RATE = 0.1
+MIN_MUTATION_RATE = 0.1
+MAX_MUTATION_RATE = 0.4
+MUTATION_HEAT_RATE = 1.5
+MUTATION_WARM_PERIOD = 20
+NUMBER_OF_CROSSOVER = 3
+VERTICAL_SWITCHING_RATE = 0.5
 
 
 def fitness(puzzle):
@@ -42,19 +46,24 @@ def giveBirth(parent_1, parent_2, crossover_points):
   return (child_1, child_2)
 
 def crossHorizontal(child_1, child_2, point):
-  save_horizontal = deepcopy(child_1[point])
-  child_1.replaceHorizontal(child_2[point],point)
-  child_2.replaceHorizontal(save_horizontal, point)
+  for i in range(0, point+1):
+    save_horizontal = deepcopy(child_1[point])
+    child_1.replaceHorizontal(child_2[point],point)
+    child_2.replaceHorizontal(save_horizontal, point)
   
 def crossVertical(child_1, child_2, point):
-  save_vertical = deepcopy(child_1.puzzle_array[:,point])
-  child_1.replaceVertical(child_2.puzzle_array[:,point], point)
-  child_2.replaceVertical(save_vertical, point)
+  for i in range(0, point+1):  
+    save_vertical = deepcopy(child_1.puzzle_array[:,point])
+    child_1.replaceVertical(child_2.puzzle_array[:,point], point)
+    child_2.replaceVertical(save_vertical, point)
 
 def mutation(puzzle, rate, createFunction):
   for i in range(puzzle.size):
     if random.random()< rate:
-      createFunction(puzzle, i)
+      number = i // 3 * 3
+      createFunction(puzzle, number)
+      createFunction(puzzle, number+1)
+      createFunction(puzzle, number+2)
 
 def createHorizontal(puzzle, number):
   available = set([i for i in range(1,10)])
@@ -89,7 +98,7 @@ def solveSudoku(puzzle):
   print(puzzle_solved_obvious)
   # time.sleep(2)
   population = dawnOfCivilization(puzzle_solved_obvious)
-  greatestOfAllTime = evolution(population, 27)
+  greatestOfAllTime = evolution(population, 27, 1)
   return greatestOfAllTime
 
 
@@ -103,7 +112,9 @@ def dawnOfCivilization(puzzle):
   return population
 
 
-def evolution(current_population, best_fit):
+def evolution(current_population, best_fit, generation):
+  print("Generation ", generation)
+  adjustMutationRate(generation)
   population_evaluated = evaluatePopulation(current_population)
   (best_organism, fitting_value) = selectBestParent(population_evaluated)
   if fitting_value == best_fit: return best_organism
@@ -111,7 +122,14 @@ def evolution(current_population, best_fit):
   print("Fitting Value: {}".format(fitting_value))
   print(best_organism)
   next_generation = getNextGeneration(population_evaluated)
-  return evolution(next_generation, best_fit)
+  generation += 1
+  return evolution(next_generation, best_fit, generation)
+
+def adjustMutationRate(generation):
+  global MUTATION_RATE
+  if generation % MUTATION_WARM_PERIOD == 0 and MUTATION_RATE > MIN_MUTATION_RATE and MUTATION_RATE < MAX_MUTATION_RATE:
+    MUTATION_RATE = MUTATION_RATE * MUTATION_HEAT_RATE
+  
 
 def evaluatePopulation(population):
   evaluation = {}

@@ -21,8 +21,6 @@ def getSolvableBox(puzzle):
       possible_values = getPossibleValues(puzzle, i, j, findBoxNumber(i, j))
 
       if len(possible_values) == 1: 
-        print("coords: {} possible: {}".format((i, j), possible_values))
-
         return ((i,j),possible_values.pop())
   return None, None
 
