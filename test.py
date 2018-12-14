@@ -1,7 +1,7 @@
-import genetic_solver, tree_solver, classes
+import genetic_solver, tree_solver, classes, guess_solver
 import unittest
 import sys
-
+import numpy as np
 
 EMPTY_PUZZLE = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -76,7 +76,8 @@ class SudokuTest(unittest.TestCase):
     return
 
   def _test_puzzleSolve(self):
-    solved = genetic_solver.solveSudoku(puzzle_array_1)
+    puzzle = np.array(puzzle_array_5)
+    solved = guess_solver.solve(puzzle)
     print(solved)
     return
 

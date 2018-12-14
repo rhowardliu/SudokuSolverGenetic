@@ -4,15 +4,18 @@ from copy import deepcopy
 import random
 import time
 
-POPULATION_NUMBER = 1000
-SURVIVAL_RATE = 0.3
-MUTATION_RATE = 0.1
+POPULATION_NUMBER = 800
+SURVIVAL_RATE = 0.35
+MUTATION_RATE = 0.12
 MIN_MUTATION_RATE = 0.1
-MAX_MUTATION_RATE = 0.4
-MUTATION_HEAT_RATE = 1.5
-MUTATION_WARM_PERIOD = 20
+MAX_MUTATION_RATE = 0.2
+MUTATION_HEAT_RATE = 1.1
+MUTATION_WARM_PERIOD = 50
 NUMBER_OF_CROSSOVER = 3
 VERTICAL_SWITCHING_RATE = 0.5
+SMOOTHING = 1
+BAGGING_NUMBER = 10
+STOP_GENERATION = 180
 
 
 def fitness(puzzle):
@@ -97,10 +100,24 @@ def solveSudoku(puzzle):
   print("Solved the obvious solutions")
   print(puzzle_solved_obvious)
   # time.sleep(2)
-  population = dawnOfCivilization(puzzle_solved_obvious)
-  greatestOfAllTime = evolution(population, 27, 1)
-  return greatestOfAllTime
+  # population = dawnOfCivilization(puzzle_solved_obvious)
+  # greatestOfAllTime = evolution(population, 27, 1)
+  return geneticBagging(puzzle_solved_obvious)
 
+def geneticBagging(puzzle):
+  mixed_population = []
+  for i in range(BAGGING_NUMBER):
+    population = dawnOfCivilization(puzzle)
+    finished_population = evolution(population, 27, 1)
+    if len(finished_population) == 1:
+      return finished_population
+    mixed_population.extend(getSurvivors(evaluatePopulation(finished_population)[0], 1 / BAGGING_NUMBER * len(finished_population), []))
+  combined_pop = evolution(mixed_population, 27, 1)
+  if len(combined_pop) == 1:
+    return combined_pop.pop()
+  (best_organism, fitting_value) = selectBestParent(evaluatePopulation(combined_pop)[0])
+  print('Final Best: ', fitting_value)
+  print(best_organism)
 
 def dawnOfCivilization(puzzle):
   population = []
@@ -115,9 +132,12 @@ def dawnOfCivilization(puzzle):
 def evolution(current_population, best_fit, generation):
   print("Generation ", generation)
   adjustMutationRate(generation)
-  population_evaluated = evaluatePopulation(current_population)
-  (best_organism, fitting_value) = selectBestParent(population_evaluated)
-  if fitting_value == best_fit: return best_organism
+  population_evaluated, weakestFitness = evaluatePopulation(current_population)
+  rebalanced_evaluation = rebalanceFitness(population_evaluated, weakestFitness, SMOOTHING)
+  (best_organism, fitting_value) = selectBestParent(rebalanced_evaluation)
+  fitting_value = fitting_value + weakestFitness - SMOOTHING
+  if fitting_value == best_fit: return [best_organism]
+  if generation >= STOP_GENERATION: return current_population
   print("Not there yet..")
   print("Fitting Value: {}".format(fitting_value))
   print(best_organism)
@@ -132,10 +152,14 @@ def adjustMutationRate(generation):
   
 
 def evaluatePopulation(population):
+  weakestFitness = 10000
   evaluation = {}
   for organism in population:
+    fit_value = fitness(organism)
+    if fit_value < weakestFitness:
+      weakestFitness = fit_value
     evaluation[organism] = fitness(organism)
-  return evaluation
+  return evaluation, weakestFitness
   
     
 def getNextGeneration(population_dict):
@@ -189,3 +213,9 @@ def selectWeightedRandom(choices):
     current += value
     if current > pick:
       return key
+
+def rebalanceFitness(choices, weakest, smoothing):
+  rebalanced = deepcopy(choices)
+  for key, value in rebalanced.items():
+    rebalanced[key] = value - weakest + smoothing
+  return rebalanced

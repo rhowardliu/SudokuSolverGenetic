@@ -1,5 +1,4 @@
 
-
 def solveObviousBoxes(puzzle):
   coordinates, solve_value = getSolvableBox(puzzle)
   if not coordinates: return puzzle
@@ -18,11 +17,23 @@ def getSolvableBox(puzzle):
   for i in range(puzzle.size):
     for j in range(puzzle.size):
       if puzzle[i][j]: continue
-      possible_values = getPossibleValues(puzzle, i, j, findBoxNumber(i, j))
+      possible_values = getPossibleValues(puzzle, (i, j))
 
       if len(possible_values) == 1: 
         return ((i,j),possible_values.pop())
   return None, None
+
+
+
+
+def nextPos(pos):
+  i, j = pos
+  if i == 8 and j == 8:
+    return None
+  if j == 8:
+    return (i+1, 0)
+  return (i, j+1)
+
 
 
 
@@ -43,20 +54,17 @@ def getBox(puzzle_array, number):
   return listofValues
 
 
-def getPossibleValues(puzzle, hor_number, vert_number, box_number):
-    possible_values = set([i for i in range(1,10)])
-    taken_values_hor = set(puzzle[hor_number])
-    taken_values_vert = set(getVertical(puzzle, vert_number))
-    taken_values_box = set(getBox(puzzle, box_number))
-    possible_values = possible_values - taken_values_hor - taken_values_vert - taken_values_box
-    return possible_values
+def getPossibleValues(puzzle, pos):
+  hor_number, vert_number = pos
+  possible_values = set([i for i in range(1,10)])
+  taken_values_hor = set(puzzle[hor_number])
+  taken_values_vert = set(getVertical(puzzle, vert_number))
+  taken_values_box = set(getBox(puzzle, findBoxNumber(hor_number, vert_number)))
+  possible_values = possible_values - taken_values_hor - taken_values_vert - taken_values_box
+  return possible_values
 
 
 
-
-def solveBox(puzzle, box, value):
-  box.val = value
-  puzzle.addBoxToCollections(box)  
 
 
 
